@@ -2,7 +2,6 @@ package com.example.whatsappclone;
 
 import android.database.Cursor;
 import android.provider.ContactsContract;
-import android.provider.Telephony;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,7 +10,9 @@ import android.support.v7.widget.RecyclerView;
 import android.telephony.TelephonyManager;
 import android.widget.LinearLayout;
 
-import com.google.firebase.auth.FirebaseAuth;
+import com.example.whatsappclone.User.UserListAdapter;
+import com.example.whatsappclone.User.UserObject;
+import com.example.whatsappclone.Utils.CountryToPhonePrefix;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -61,7 +62,7 @@ public class FindUserActivity extends AppCompatActivity {
                 phone = ISOPrefix + phone;
             }
 
-            UserObject mContact = new UserObject(name, phone);
+            UserObject mContact = new UserObject("", name, phone);
             contactList.add(mContact);
             getUserDetails(mContact);
         }
@@ -80,10 +81,18 @@ public class FindUserActivity extends AppCompatActivity {
                             phone = childSnapshot.child("phone").getValue().toString();
                         }
                         if(childSnapshot.child("name").getValue() != null){
-                            phone = childSnapshot.child("name").getValue().toString();
+                            name = childSnapshot.child("name").getValue().toString();
                         }
 
-                        UserObject mUser = new UserObject(name, phone);
+                        UserObject mUser = new UserObject(childSnapshot.getKey(), name, phone);
+                        if(name.equals(phone)){
+                            for(UserObject mContactIterator : contactList){
+                                if(mContactIterator.getPhone().equals(mUser.getPhone())){
+                                    mUser.setName(mContactIterator.getName());
+                                }
+                            }
+                        }
+
                         userList.add(mUser);
                         mUserListAdapter.notifyDataSetChanged();
                         return;
